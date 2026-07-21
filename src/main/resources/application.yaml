@@ -1,6 +1,12 @@
 server:
   port: 8080
 
+app:
+  security:
+    jwt:
+      secret: ${JWT_SECRET}
+      expiration: ${JWT_EXPIRATION:3600000}
+
 spring:
   application:
     name: SubsTrack
