@@ -9,5 +9,7 @@ public interface UserFacade {
     UUID createUser(CreateUserCommand command);
     boolean emailExists(String email);
     boolean usernameExists(String username);
+    boolean userByIdExists(UUID id);
+    boolean userContainsEmail(UUID userId, UUID emailId);
     UserCredentialsResponse getUserCredentialsByEmail(String email);
 }
