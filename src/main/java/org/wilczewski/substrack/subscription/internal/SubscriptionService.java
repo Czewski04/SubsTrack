@@ -3,6 +3,7 @@ package org.wilczewski.substrack.subscription.internal;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.wilczewski.substrack.subscription.api.dto.SubscriptionFacade;
 import org.wilczewski.substrack.subscription.api.dto.command.CreateSubscriptionCommand;
 import org.wilczewski.substrack.subscription.api.dto.command.DeleteSubscriptionCommand;
 import org.wilczewski.substrack.subscription.api.dto.command.UpdateSubscriptionCommand;
@@ -15,7 +16,7 @@ import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
-class SubscriptionService {
+class SubscriptionService implements SubscriptionFacade {
     private final UserFacade userFacade;
     private final SubscriptionRepository subscriptionRepository;
     private final SubscriptionMapper subscriptionMapper;
@@ -55,6 +56,7 @@ class SubscriptionService {
     }
 
     @Transactional(readOnly = true)
+    @Override
     public SubscriptionResponse getSubscriptionById(GetUserSubscriptionQuery getUserSubscriptionQuery){
         Subscription subscription = validateSubscriptionOwnership(getUserSubscriptionQuery.userId(), getUserSubscriptionQuery.subscriptionId());
         return subscriptionMapper.toSubscriptionResponse(subscription);
@@ -72,6 +74,18 @@ class SubscriptionService {
         return subscription;
     }
 
+    @Override
+    public void validateSubscription(UUID userId, UUID subscriptionId) {
+        if(!userFacade.userByIdExists(userId)){
+            throw new IllegalArgumentException("User not found");
+        }
+        Subscription subscription = subscriptionRepository.findById(subscriptionId)
+                .orElseThrow(() -> new IllegalArgumentException("Subscription not found"));
+        if (!subscription.getUserId().equals(userId)) {
+            throw new IllegalArgumentException("Subscription does not belong to user");
+        }
+    }
+
     @Transactional(readOnly = true)
     public List<SubscriptionResponse> getSubscriptionsByUserId(UUID userId){
         if(!userFacade.userByIdExists(userId)){
@@ -81,5 +95,11 @@ class SubscriptionService {
         return subscriptions.stream()
                 .map(subscriptionMapper::toSubscriptionResponse)
                 .toList();
+    }
+
+    @Transactional(readOnly = true)
+    @Override
+    public boolean subscriptionExist(UUID subscriptionId) {
+        return subscriptionRepository.existsById(subscriptionId);
     }
 }
