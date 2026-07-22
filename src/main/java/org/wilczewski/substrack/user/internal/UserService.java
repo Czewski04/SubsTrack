@@ -1,6 +1,7 @@
 package org.wilczewski.substrack.user.internal;
 
 
+import lombok.AllArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -13,16 +14,11 @@ import java.util.List;
 import java.util.UUID;
 
 @Service
+@AllArgsConstructor
 class UserService implements UserFacade {
     UserRepository userRepository;
     UserMapper userMapper;
     PasswordEncoder passwordEncoder;
-
-    public UserService(UserRepository userRepository,  UserMapper userMapper, PasswordEncoder passwordEncoder) {
-        this.userRepository = userRepository;
-        this.userMapper = userMapper;
-        this.passwordEncoder = passwordEncoder;
-    }
 
     @Override
     @Transactional
@@ -46,6 +42,12 @@ class UserService implements UserFacade {
 
     @Override
     @Transactional(readOnly = true)
+    public boolean userByIdExists(UUID id) {
+        return userRepository.existsById(id);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
     public UserCredentialsResponse getUserCredentialsByEmail(String email) {
         User user = userRepository.findByEmail(email);
         if (user == null) {
@@ -55,7 +57,7 @@ class UserService implements UserFacade {
     }
 
     @Transactional
-    public void createUserEmail(CreateUserEmailCommand command) {
+    public UUID createUserEmail(CreateUserEmailCommand command) {
         User user = userRepository.findById(command.userId())
                 .orElseThrow(() -> new IllegalArgumentException("User not found"));
 
@@ -63,6 +65,9 @@ class UserService implements UserFacade {
             throw new IllegalArgumentException("Email already exists for this user");
         }
         user.addAdditionalEmail(command.email());
+        userRepository.saveAndFlush(user);
+        return user.getEmailIdByEmail(command.email());
+        
     }
 
     @Transactional
@@ -125,6 +130,17 @@ class UserService implements UserFacade {
     public List<UserResponse> getAllUsers() {
         List<User> users = userRepository.findAll();
         return userMapper.toUserResponseList(users);
+    }
+
+    @Transactional(readOnly = true)
+    @Override
+    public boolean userContainsEmail(UUID userId, UUID emailId) {
+        if(!userRepository.existsById(userId)){
+            return false;
+        }
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new IllegalArgumentException("User not found"));
+        return user.getAdditionalEmails().stream().anyMatch(email -> email.getId().equals(emailId));
     }
 }
 
