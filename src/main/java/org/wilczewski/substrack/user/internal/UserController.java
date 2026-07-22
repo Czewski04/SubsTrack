@@ -9,7 +9,7 @@ import org.wilczewski.substrack.user.api.dto.command.*;
 import org.wilczewski.substrack.user.api.dto.request.*;
 import org.wilczewski.substrack.user.api.dto.response.UserResponse;
 
-import java.util.List;
+import java.net.URI;
 import java.util.UUID;
 
 @RestController
@@ -23,6 +23,8 @@ class UserController {
 //        List<UserResponse> userResponses = userService.getAllUsers();
 //        return ResponseEntity.ok(userResponses);
 //    }
+
+//  to do: createUser for admin
 
     @GetMapping("/me")
     public ResponseEntity<UserResponse> getUserById(@AuthenticationPrincipal UUID id) {
@@ -38,8 +40,8 @@ class UserController {
 
     @PostMapping("/me/emails")
     public ResponseEntity<Void> addEmailToUser(@AuthenticationPrincipal UUID id, @RequestBody @Valid CreateUserEmailRequest request) {
-        userService.createUserEmail(new CreateUserEmailCommand(id, request.email()));
-        return ResponseEntity.ok().build();
+        UUID emailId = userService.createUserEmail(new CreateUserEmailCommand(id, request.email()));
+        return ResponseEntity.created(URI.create("/api/v1/users/me/emails/" + emailId)).build();
     }
 
     @PutMapping("/me/emails")

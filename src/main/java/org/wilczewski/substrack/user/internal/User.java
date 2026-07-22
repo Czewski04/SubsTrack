@@ -69,4 +69,13 @@ class User {
             }
         }
     }
+
+    public UUID getEmailIdByEmail(String email) {
+        for (UserEmail userEmail : additionalEmails) {
+            if (userEmail.getEmail().equals(email)) {
+                return userEmail.getId();
+            }
+        }
+        throw new IllegalArgumentException("Email not found");
+    }
 }
