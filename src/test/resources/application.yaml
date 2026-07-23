@@ -1,0 +1,19 @@
+app:
+  mail:
+    from: test@substrack.local
+  security:
+    jwt:
+      secret: test-secret-key-that-is-at-least-32-bytes-long
+      expiration: 3600000
+
+spring:
+  mail:
+    host: localhost
+    port: 2525
+  jpa:
+    open-in-view: false
+    hibernate:
+      ddl-auto: validate
+  liquibase:
+    enabled: true
+    change-log: classpath:/db/changelog/db.changelog-master.yaml
