@@ -53,9 +53,9 @@ spring:
     password: ${MAIL_PASSWORD:password}
     properties:
       mail:
-        smtp:
+        SMTP:
           auth: true
-          starttls:
+          STARTTLS:
             enable: true
 
 springdoc:
