@@ -10,6 +10,8 @@ app:
       expiration: ${JWT_EXPIRATION:3600000}
 
 spring:
+  config:
+    import: optional:file:.env[.properties]
   application:
     name: SubsTrack
   datasource:
