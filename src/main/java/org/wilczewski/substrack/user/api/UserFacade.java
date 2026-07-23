@@ -12,4 +12,5 @@ public interface UserFacade {
     boolean userByIdExists(UUID id);
     boolean userContainsEmail(UUID userId, UUID emailId);
     UserCredentialsResponse getUserCredentialsByEmail(String email);
+    String getUserEmailByEmailId(UUID emailId);
 }

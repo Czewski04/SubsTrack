@@ -102,4 +102,13 @@ class SubscriptionService implements SubscriptionFacade {
     public boolean subscriptionExist(UUID subscriptionId) {
         return subscriptionRepository.existsById(subscriptionId);
     }
+
+    @Transactional(readOnly = true)
+    @Override
+    public List<SubscriptionResponse> getAllActiveSubscriptions() {
+        List<Subscription> subscriptions = subscriptionRepository.findAllByIsActiveTrue();
+        return subscriptions.stream()
+                .map(subscriptionMapper::toSubscriptionResponse)
+                .toList();
+    }
 }
