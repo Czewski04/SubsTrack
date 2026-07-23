@@ -1,0 +1,4 @@
+Hello!
+We are reminding you that your subscription [(${subscriptionName})] will be billed in [(${daysBefore})] days on [(${billingDate})].
+Best regards,
+Substrack Team
