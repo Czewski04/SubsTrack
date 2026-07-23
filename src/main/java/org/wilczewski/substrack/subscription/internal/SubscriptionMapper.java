@@ -11,10 +11,12 @@ import java.util.UUID;
 
 @Mapper(componentModel = "spring", unmappedTargetPolicy = ReportingPolicy.IGNORE)
 interface SubscriptionMapper {
+    @Mapping(target = "isActive", source = "active")
     SubscriptionResponse toSubscriptionResponse(Subscription subscription);
     Subscription toSubscription(CreateSubscriptionCommand createSubscriptionCommand);
     @Mapping(target = "id", ignore = true)
     @Mapping(target = "userId", ignore = true)
+    @Mapping(target = "active", source = "isActive")
     void updateSubscription(@MappingTarget Subscription subscription, UpdateSubscriptionCommand updateSubscriptionCommand);
     @Mapping(target = "userId", source = "userId")
     CreateSubscriptionCommand toCreateSubscriptionCommand(CreateSubscriptionRequest createSubscriptionRequest, UUID userId);

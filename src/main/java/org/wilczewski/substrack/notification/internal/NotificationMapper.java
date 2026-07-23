@@ -14,10 +14,13 @@ import java.util.UUID;
 
 @Mapper(componentModel = "spring", unmappedTargetPolicy = ReportingPolicy.IGNORE)
 interface NotificationMapper {
+    @Mapping(target = "isActive", source = "active")
     NotificationResponse toNotificationResponse(Notification notification);
+    @Mapping(target = "active", source = "isActive")
     Notification toNotification(CreateNotificationCommand createNotificationCommand);
     @Mapping(target = "id", ignore = true)
     @Mapping(target = "subscriptionId", ignore = true)
+    @Mapping(target = "active", source = "isActive")
     void updateNotification(@MappingTarget Notification notification, UpdateNotificationCommand updateNotificationCommand);
     @Mapping(target = "userId", source = "userId")
     @Mapping(target = "subscriptionId", source = "subscriptionId")
