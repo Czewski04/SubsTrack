@@ -5,6 +5,7 @@ import org.springframework.mail.MailException;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.stereotype.Service;
+import org.wilczewski.substrack.common.exception.InternalServerException;
 import org.wilczewski.substrack.email.api.EmailFacade;
 import org.wilczewski.substrack.subscription.api.dto.response.SubscriptionResponse;
 
@@ -32,7 +33,7 @@ class EmailService implements EmailFacade {
             message.setText(text);
             mailSender.send(message);
         } catch (MailException e) {
-            throw new IllegalStateException("Failed to send payment reminder to " + to, e);
+            throw new InternalServerException("Failed to send payment reminder to " + to, e);
         }
     }
 }

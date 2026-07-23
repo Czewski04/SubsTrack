@@ -8,10 +8,12 @@ import org.wilczewski.substrack.auth.api.AuthFacade;
 import org.wilczewski.substrack.auth.api.dto.command.LoginCommand;
 import org.wilczewski.substrack.auth.api.dto.command.RegisterCommand;
 import org.wilczewski.substrack.auth.api.dto.response.TokenResponse;
+import org.wilczewski.substrack.common.exception.BadRequestException;
+import org.wilczewski.substrack.common.exception.ConflictException;
+import org.wilczewski.substrack.common.exception.UnauthorizedException;
 import org.wilczewski.substrack.user.api.UserFacade;
 import org.wilczewski.substrack.user.api.dto.command.CreateUserCommand;
 import org.wilczewski.substrack.user.api.dto.response.UserCredentialsResponse;
-
 import java.util.UUID;
 
 @Service
@@ -23,16 +25,15 @@ class AuthService implements AuthFacade {
     private final JwtService jwtService;
 
     public TokenResponse register(RegisterCommand command) {
-        if(userFacade.emailExists(command.email()) || userFacade.usernameExists(command.username())){
-            throw new IllegalArgumentException("Username or email already exists");
+        if (userFacade.emailExists(command.email()) || userFacade.usernameExists(command.username())) {
+            throw new ConflictException("Username or email already exists");
         }
 
-        if(!command.password().equals(command.confirmPassword())){
-            throw new IllegalArgumentException("Password and confirm password do not match");
+        if (!command.password().equals(command.confirmPassword())) {
+            throw new BadRequestException("Password and confirm password do not match");
         }
 
         String passwordHash = passwordEncoder.encode(command.password());
-
         CreateUserCommand createUserCommand = new CreateUserCommand(
                 command.username(),
                 command.email(),
@@ -44,15 +45,14 @@ class AuthService implements AuthFacade {
     }
 
     public TokenResponse login(LoginCommand command) {
-        if(!userFacade.emailExists(command.email())){
-            throw new IllegalArgumentException("Invalid credentials");
+        if (!userFacade.emailExists(command.email())) {
+            throw new UnauthorizedException("Invalid credentials");
         }
         UserCredentialsResponse userCredentials = userFacade.getUserCredentialsByEmail(command.email());
         if (!passwordEncoder.matches(command.password(), userCredentials.passwordHash())) {
-            throw new IllegalArgumentException("Invalid credentials");
+            throw new UnauthorizedException("Invalid credentials");
         }
         String token = jwtService.generateToken(userCredentials.id());
         return new TokenResponse(token);
     }
-
 }
