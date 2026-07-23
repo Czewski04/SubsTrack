@@ -4,6 +4,8 @@ import lombok.*;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
+import org.wilczewski.substrack.common.exception.BadRequestException;
+import org.wilczewski.substrack.common.exception.ResourceNotFoundException;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -59,15 +61,17 @@ class User {
         }
     }
 
-    public void  deleteAdditionalEmail(UUID emailId) throws Exception {
+    public void deleteAdditionalEmail(UUID emailId) {
         for (UserEmail userEmail : additionalEmails) {
             if (userEmail.getId().equals(emailId)) {
-                if(userEmail.getEmail().equals(this.email)) {
-                    throw new Exception("Cannot delete primary email");
+                if (userEmail.getEmail().equals(this.email)) {
+                    throw new BadRequestException("Cannot delete primary email");
                 }
                 additionalEmails.remove(userEmail);
+                return;
             }
         }
+        throw new ResourceNotFoundException("Email not found");
     }
 
     public UUID getEmailIdByEmail(String email) {
@@ -76,6 +80,6 @@ class User {
                 return userEmail.getId();
             }
         }
-        throw new IllegalArgumentException("Email not found");
+        throw new ResourceNotFoundException("Email not found");
     }
 }
