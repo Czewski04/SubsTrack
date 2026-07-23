@@ -142,5 +142,19 @@ class UserService implements UserFacade {
                 .orElseThrow(() -> new IllegalArgumentException("User not found"));
         return user.getAdditionalEmails().stream().anyMatch(email -> email.getId().equals(emailId));
     }
+
+    @Transactional(readOnly = true)
+    @Override
+    public String getUserEmailByEmailId(UUID emailId) {
+        User user = userRepository.findByAdditionalEmailsId(emailId);
+        if(user == null){
+            throw new IllegalArgumentException("User not found");
+        }
+        return user.getAdditionalEmails().stream()
+                .filter(email -> email.getId().equals(emailId))
+                .findFirst()
+                .orElseThrow(() -> new IllegalArgumentException("Email not found"))
+                .getEmail();
+    }
 }
 
