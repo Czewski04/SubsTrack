@@ -1,2 +1,5 @@
 databaseChangeLog:
-  #
+
+  - include:
+      file: db/changelog/2026/07/23-01-changelog.sql
+#
