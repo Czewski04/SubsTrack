@@ -3,13 +3,13 @@ services:
     image: postgres:18-alpine
     container_name: substrack-postgres-db
     environment:
-      POSTGRES_USER: ${DB_USERNAME:postgres}
-      POSTGRES_PASSWORD: ${DB_PASSWORD:password}
-      POSTGRES_DB: ${DB_NAME:substrack}
+      POSTGRES_USER: ${DB_USERNAME:-postgres}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-password}
+      POSTGRES_DB: ${DB_NAME:-substrack}
     ports:
       - "5432:5432"
     volumes:
-      - postgres_data:/var/lib/postgresql/data
+      - postgres_data:/var/lib/postgresql
     restart: unless-stopped
 volumes:
   postgres_data:
