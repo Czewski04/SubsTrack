@@ -1,10 +1,13 @@
 package org.wilczewski.substrack.email.internal;
 
-import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.mail.MailException;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.stereotype.Service;
+import org.thymeleaf.context.Context;
+import org.thymeleaf.spring6.SpringTemplateEngine;
 import org.wilczewski.substrack.common.exception.InternalServerException;
 import org.wilczewski.substrack.email.api.EmailFacade;
 import org.wilczewski.substrack.subscription.api.dto.response.SubscriptionResponse;
@@ -12,24 +15,35 @@ import org.wilczewski.substrack.subscription.api.dto.response.SubscriptionRespon
 import java.time.LocalDate;
 
 @Service
-@RequiredArgsConstructor
 class EmailService implements EmailFacade {
     private final JavaMailSender mailSender;
+    private final SpringTemplateEngine emailTemplateEngine;
+    private final String from;
+
+    EmailService(
+            JavaMailSender mailSender,
+            @Qualifier("emailTemplateEngine") SpringTemplateEngine emailTemplateEngine,
+            @Value("${app.mail.from}") String from
+    ) {
+        this.mailSender = mailSender;
+        this.emailTemplateEngine = emailTemplateEngine;
+        this.from = from;
+    }
 
     @Override
     public void sendPaymentReminder(String to, SubscriptionResponse subscription, LocalDate billingDate, long daysBefore) {
         try {
+            Context context = new Context();
+            context.setVariable("subscriptionName", subscription.name());
+            context.setVariable("daysBefore", daysBefore);
+            context.setVariable("billingDate", billingDate);
+
+            String text = emailTemplateEngine.process("payment-reminder", context);
+
             SimpleMailMessage message = new SimpleMailMessage();
-            message.setFrom("noreply@substrack.com");
+            message.setFrom(from);
             message.setTo(to);
             message.setSubject(subscription.name() + " - Payment reminder");
-            String text = "Hello!\nWe are reminding you that your subscription "
-                    + subscription.name()
-                    + " will be billed in "
-                    + daysBefore
-                    + " days on "
-                    + billingDate
-                    + ".\nBest regards,\nSubstrack Team";
             message.setText(text);
             mailSender.send(message);
         } catch (MailException e) {
